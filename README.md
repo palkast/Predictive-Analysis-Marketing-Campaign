@@ -9,5 +9,5 @@ Dataset:https://github.com/palkast/Predictive-Analysis-Marketing-Campaign/blob/m
 
 Executive Summary deck: 
 
-Technical document:
+Technical document:https://github.com/palkast/Predictive-Analysis-Marketing-Campaign/blob/main/Predictive_Analysis_Marketing_Campaign_technical_document.docx
 
