@@ -1,0 +1,114 @@
+---
+title: "Predictive Analysis for marketing campaign technical document"
+date: "2023-07-22"
+output:
+  word_document: default
+  pdf_document: default
+---
+# Load library
+```{r message=FALSE, warning=FALSE}
+library(dplyr)
+library(ggplot2)
+library(caret)
+library(class)
+library(rpart)
+library(pROC)
+library(rpart.plot) 
+library(e1071)
+```
+
+# Load the file
+```{r message=FALSE, warning=FALSE}
+XYZ = read.csv('XYZData.csv')
+```
+
+# Observe data and do the oversampling
+```{r message=FALSE, warning=FALSE}
+# remove the userID column that is not helpful for our prediction
+XYZ_for_test1 = XYZ[,2:27]
+
+# split our sample data into 70% for cross-validation 30% for the final-testing
+train_rows = createDataPartition(y = XYZ_for_test1$adopter, p = 0.70, list = FALSE)
+XYZData_train = XYZ_for_test1[train_rows,]
+XYZData_test = XYZ_for_test1[-train_rows,]
+
+#observing our data, discover it is imbalance and need oversampling for help
+table(XYZ_for_test1$adopter)
+library(ROSE)
+oversample_traindata = ovun.sample(adopter ~ ., 
+                                   data = XYZData_train, 
+                                   method = 'over',
+                                   N = nrow(XYZData_train)*1.5)$data
+
+```
+
+# Do the cross-validation for Decision tree model. Then pre-prune plus post-prune to find one best model.
+```{r message=FALSE}
+# Seperate our data into five folds for cross-validation test
+cv = createFolds(y = oversample_traindata$adopter, k = 5)
+auc_all = c()
+for (test_rows in cv) {
+  XYZcross_train = oversample_traindata[-test_rows,]
+  XYZcross_test = oversample_traindata[test_rows,]
+  tree_preprun = rpart(adopter ~ ., data = XYZcross_train, 
+                       method = "class",
+                       parms = list(split = "information"),
+                       control = rpart.control(cp = 0, 
+                                               maxdepth = 4,
+                                               ))
+  pred_tree = predict(tree_preprun, XYZcross_test, type = "prob")
+  tree.roc = roc(response = XYZcross_test$adopter, 
+                 predictor = pred_tree[,2])
+  auc_all = c(auc_all,auc(tree.roc))
+}
+```
+
+# Print out the auc for decision tree models of each folds and the mean auc 
+```{r message=FALSE}
+auc_all
+mean(auc_all)
+```
+
+# Also test on the Naive Bayes model with the same way
+```{r message=FALSE}
+
+auc_all = c()
+for (test_rows in cv) {
+  XYZcross_train = oversample_traindata[-test_rows,]
+  nb_XYZcross_train = naiveBayes(adopter ~ ., data = XYZcross_train)
+  XYZcross_test = oversample_traindata[test_rows,]
+  pred_nb = predict(nb_XYZcross_train, XYZcross_test)
+  prob_pred_nb = predict(nb_XYZcross_train, XYZcross_test, type = "raw")
+  nb.roc = roc(response = XYZcross_test$adopter, 
+                 predictor = prob_pred_nb[,2])
+  auc_all = c(auc_all,auc(nb.roc))
+
+}
+```
+
+# Print out the auc for Naive Bayes models of each folds and the mean auc 
+```{r message=FALSE}
+auc_all
+mean(auc_all)
+```
+
+## After comparing the AUC between these two models, we decided to choose the Decision Tree model with a higher AUC
+
+
+# Do the final testing with the 30% of our test data
+```{r message=FALSE}
+tree_final = rpart(adopter ~ ., data = oversample_traindata, 
+                     method = "class",
+                     parms = list(split = "information"),
+                     control = rpart.control(cp = 0, 
+                                             maxdepth = 4,
+                     ))
+pred_tree_final = predict(tree_final, XYZData_test, type = "prob")
+prp(tree_final, varlen = 0)
+
+tree.roc_final = roc(response = XYZData_test$adopter, 
+                     predictor = pred_tree_final[,2])
+
+auc_final = tree.roc_final
+auc_final
+```
