@@ -7,7 +7,7 @@ Resrources: Dataset contains 41,540 records (1540 adopters and 40,000 non-adopte
 
 Dataset:https://github.com/palkast/Predictive-Analysis-Marketing-Campaign/blob/main/XYZData.csv
 
-Executive Summary deck: 
+Executive Summary deck: https://github.com/palkast/Predictive-Analysis-Marketing-Campaign/blob/main/Predictive_Analysis_Marketing_Campaign_Deck.pdf
 
 Technical document:https://github.com/palkast/Predictive-Analysis-Marketing-Campaign/blob/main/Predictive_Analysis_Marketing_Campaign_technical_document.docx
 
