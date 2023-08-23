@@ -5,7 +5,7 @@ Key Question: We are interested in predicting which people would be likely to co
 
 Resrources: Dataset contains 41,540 records (1540 adopters and 40,000 non-adopters), each record representing a different user of the XYZ website who was targeted in the previous marketing campaign. Each record is described with 25 attributes.
 
-Dataset:
+Dataset:https://github.com/palkast/Predictive-Analysis-Marketing-Campaign/blob/main/XYZData.csv
 
 Executive Summary deck: 
 
